@@ -162,13 +162,13 @@ jobs:
 
     - name: Start services with Docker Compose
       run: |
-        docker-compose up -d
+        docker compose up -d
         sleep 15
 
     - name: Check services are running
       run: |
-        docker-compose ps
-        docker-compose logs
+        docker compose ps
+        docker compose logs
 
     - name: Test App1 via Docker Compose
       run: |
@@ -181,7 +181,7 @@ jobs:
         curl -f http://localhost:8081/api/info || exit 1
 
     - name: Stop services
-      run: docker-compose down
+      run: docker compose down
 
   # Job 5: Security Scan (Optional)
   security-scan:
