@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App 1 - GKE CI/CD Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text-light: #eaeaea;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f3460 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-custom {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color) !important;
+        }
+
+        .hero-section {
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #a8a8a8;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+        }
+
+        .info-card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+
+        .badge-custom {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin: 5px;
+            border-radius: 20px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .deployment-info {
+            background: rgba(66, 133, 244, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding: 20px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-rocket"></i> Application 1
+            </a>
+            <span class="badge bg-success">
+                <span class="status-indicator"></span>Running on {{ cluster_name }}
+            </span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">
+                <i class="fas fa-cloud"></i> GKE CI/CD Pipeline Demo
+            </h1>
+            <p class="hero-subtitle">Application 1 - Successfully Deployed!</p>
+            <div class="mt-4">
+                <span class="badge badge-custom bg-primary"><i class="fab fa-google"></i> Google Cloud</span>
+                <span class="badge badge-custom bg-info"><i class="fas fa-dharmachakra"></i> Kubernetes</span>
+                <span class="badge badge-custom bg-success"><i class="fab fa-python"></i> Flask</span>
+                <span class="badge badge-custom bg-warning text-dark"><i class="fas fa-docker"></i> Docker</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="info-card text-center">
+                    <i class="fas fa-server"></i>
+                    <h3>Deployment Info</h3>
+                    <p><strong>App Name:</strong> {{ app_name }}</p>
+                    <p><strong>Version:</strong> {{ version }}</p>
+                    <p><strong>Port:</strong> 8080</p>
+                    <p><strong>Replicas:</strong> 3</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card text-center">
+                    <i class="fas fa-network-wired"></i>
+                    <h3>Cluster Info</h3>
+                    <p><strong>Cluster:</strong> {{ cluster_name }}</p>
+                    <p><strong>Namespace:</strong> default</p>
+                    <p><strong>Service Type:</strong> LoadBalancer</p>
+                    <p><strong>Status:</strong> <span class="text-success">Healthy</span></p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card text-center">
+                    <i class="fas fa-code-branch"></i>
+                    <h3>CI/CD Pipeline</h3>
+                    <p><strong>Build:</strong> Cloud Build</p>
+                    <p><strong>Deploy:</strong> Cloud Deploy</p>
+                    <p><strong>Registry:</strong> Artifact Registry</p>
+                    <p><strong>Tool:</strong> Skaffold</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deployment Details -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> Deployment Details</h3>
+                    <div class="deployment-info">
+                        <p><strong>Deployment Timestamp:</strong> {{ timestamp }}</p>
+                        <p><strong>Hostname:</strong> {{ hostname }}</p>
+                        <p><strong>Environment:</strong> {{ environment }}</p>
+                    </div>
+                    <p class="mt-3">
+                        This application was automatically deployed using a CI/CD pipeline that includes:
+                        Google Cloud Build for building Docker images, Cloud Deploy for managing deployments,
+                        and GKE for running the containerized application in a Kubernetes cluster.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <p>&copy; 2025 GKE CI/CD Demo Project | Built with <i class="fas fa-heart text-danger"></i> using Flask & Kubernetes</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

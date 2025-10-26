@@ -1,0 +1,242 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_APP1: ${{ github.repository }}/app1
+  IMAGE_NAME_APP2: ${{ github.repository }}/app2
+
+jobs:
+  # Job 1: Build and Test
+  build-and-test:
+    name: Build and Test Applications
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies for App1
+      run: |
+        cd app1
+        pip install -r requirements.txt
+
+    - name: Install dependencies for App2
+      run: |
+        cd app2
+        pip install -r requirements.txt
+
+    - name: Test App1 imports
+      run: |
+        cd app1
+        python -c "from app import app; print('App1 imports successfully')"
+
+    - name: Test App2 imports
+      run: |
+        cd app2
+        python -c "from app import app; print('App2 imports successfully')"
+
+  # Job 2: Build Docker Images
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build App1 Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./app1
+        file: ./app1/Dockerfile
+        push: false
+        tags: app1:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build App2 Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./app2
+        file: ./app2/Dockerfile
+        push: false
+        tags: app2:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Job 3: Test Docker Containers
+  test-docker:
+    name: Test Docker Containers
+    runs-on: ubuntu-latest
+    needs: build-docker
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build and run App1
+      run: |
+        cd app1
+        docker build -t app1:test .
+        docker run -d -p 8080:8080 --name test-app1 \
+          -e CLUSTER_NAME="GitHub Actions" \
+          -e ENVIRONMENT="CI/CD Test" \
+          app1:test
+        sleep 10
+
+    - name: Test App1 health endpoint
+      run: |
+        curl -f http://localhost:8080/health || exit 1
+        echo "App1 health check passed!"
+
+    - name: Test App1 API endpoint
+      run: |
+        curl -f http://localhost:8080/api/info || exit 1
+        echo "App1 API endpoint passed!"
+
+    - name: Test App1 main page
+      run: |
+        curl -f http://localhost:8080/ || exit 1
+        echo "App1 main page passed!"
+
+    - name: Stop App1
+      run: docker stop test-app1
+
+    - name: Build and run App2
+      run: |
+        cd app2
+        docker build -t app2:test .
+        docker run -d -p 8081:8081 --name test-app2 \
+          -e CLUSTER_NAME="GitHub Actions" \
+          -e ENVIRONMENT="CI/CD Test" \
+          app2:test
+        sleep 10
+
+    - name: Test App2 health endpoint
+      run: |
+        curl -f http://localhost:8081/health || exit 1
+        echo "App2 health check passed!"
+
+    - name: Test App2 API endpoint
+      run: |
+        curl -f http://localhost:8081/api/info || exit 1
+        echo "App2 API endpoint passed!"
+
+    - name: Test App2 main page
+      run: |
+        curl -f http://localhost:8081/ || exit 1
+        echo "App2 main page passed!"
+
+    - name: Show App1 logs
+      if: always()
+      run: docker logs test-app1
+
+    - name: Show App2 logs
+      if: always()
+      run: docker logs test-app2
+
+  # Job 4: Deploy with Docker Compose
+  deploy-compose:
+    name: Test Docker Compose Deployment
+    runs-on: ubuntu-latest
+    needs: test-docker
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Start services with Docker Compose
+      run: |
+        docker-compose up -d
+        sleep 15
+
+    - name: Check services are running
+      run: |
+        docker-compose ps
+        docker-compose logs
+
+    - name: Test App1 via Docker Compose
+      run: |
+        curl -f http://localhost:8080/health || exit 1
+        curl -f http://localhost:8080/api/info || exit 1
+
+    - name: Test App2 via Docker Compose
+      run: |
+        curl -f http://localhost:8081/health || exit 1
+        curl -f http://localhost:8081/api/info || exit 1
+
+    - name: Stop services
+      run: docker-compose down
+
+  # Job 5: Security Scan (Optional)
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-docker
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build App1 for scanning
+      run: docker build -t app1:scan ./app1
+
+    - name: Run Trivy vulnerability scanner on App1
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'app1:scan'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
+
+    - name: Build App2 for scanning
+      run: docker build -t app2:scan ./app2
+
+    - name: Run Trivy vulnerability scanner on App2
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'app2:scan'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
+
+  # Job 6: Report Status
+  report:
+    name: Pipeline Status Report
+    runs-on: ubuntu-latest
+    needs: [build-and-test, build-docker, test-docker, deploy-compose]
+    if: always()
+    
+    steps:
+    - name: Report Success
+      if: ${{ needs.build-and-test.result == 'success' && needs.build-docker.result == 'success' && needs.test-docker.result == 'success' && needs.deploy-compose.result == 'success' }}
+      run: |
+        echo "✅ All pipeline stages completed successfully!"
+        echo "🚀 Applications are ready for deployment"
+
+    - name: Report Failure
+      if: ${{ needs.build-and-test.result == 'failure' || needs.build-docker.result == 'failure' || needs.test-docker.result == 'failure' || needs.deploy-compose.result == 'failure' }}
+      run: |
+        echo "❌ Pipeline failed!"
+        echo "Build and Test: ${{ needs.build-and-test.result }}"
+        echo "Build Docker: ${{ needs.build-docker.result }}"
+        echo "Test Docker: ${{ needs.test-docker.result }}"
+        echo "Deploy Compose: ${{ needs.deploy-compose.result }}"
+        exit 1

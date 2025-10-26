@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-container
+          image: quickstart-image:latest
+          imagePullPolicy: Never  # Para Minikube local
+          ports:
+            - containerPort: 8080
+          env:
+            - name: CLUSTER_NAME
+              value: "Minikube Local"
+            - name: ENVIRONMENT
+              value: "Development"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: my-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080  # Puerto fijo para acceso local
+  type: NodePort

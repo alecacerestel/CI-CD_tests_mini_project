@@ -1,0 +1,30 @@
+services:
+  app1:
+    build: ./app1
+    container_name: gke-demo-app1
+    ports:
+      - "8080:8080"
+    environment:
+      - CLUSTER_NAME=Local Docker Compose
+      - ENVIRONMENT=Development
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - gke-network
+
+  app2:
+    build: ./app2
+    container_name: gke-demo-app2
+    ports:
+      - "8081:8081"
+    environment:
+      - CLUSTER_NAME=Local Docker Compose
+      - ENVIRONMENT=Development
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - gke-network
+
+networks:
+  gke-network:
+    driver: bridge
