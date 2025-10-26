@@ -1,5 +1,7 @@
 # CI/CD Pipeline for Deploying Applications on Google Kubernetes Engine (GKE)
 
+![CI/CD Pipeline](https://github.com/alecacerestel/CI-CD_tests_mini_project/actions/workflows/ci-cd.yml/badge.svg)
+
 ## Descripción del Proyecto
 
 Este proyecto implementa un pipeline completo de **CI/CD (Integración Continua/Despliegue Continuo)** para desplegar automáticamente aplicaciones Flask en **Google Kubernetes Engine (GKE)**. El sistema automatiza todo el proceso desde el push de código hasta el despliegue en producción, pasando por un ambiente de desarrollo para validación.
