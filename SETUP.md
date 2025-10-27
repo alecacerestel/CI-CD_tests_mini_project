@@ -1,106 +1,106 @@
-# ⚙️ Configuración Rápida del Proyecto
+# Quick Project Setup Guide
 
-## 🎯 Para actualizar el Project ID de Google Cloud
+## Updating Google Cloud Project ID
 
-### Opción 1: Script Automático (Recomendado)
+### Option 1: Automatic Script (Recommended)
 
 ```powershell
-# Ejecutar el script de configuración
-.\configure.ps1 -ProjectId "tu-project-id-aqui"
+# Run the configuration script
+.\configure.ps1 -ProjectId "your-project-id-here"
 ```
 
-### Opción 2: Manual
+### Option 2: Manual
 
-Reemplaza manualmente en estos archivos:
+Manually replace in these files:
 
 1. **cloudbuild.yaml**
-   - Busca: `<your_project_id>` o `prj-poc-001`
-   - Reemplaza con: Tu Project ID
+   - Find: `<your_project_id>` or `prj-poc-001`
+   - Replace with: Your Project ID
 
 2. **kubernetes/app1.yaml**
-   - Busca: `prj-poc-001`
-   - Reemplaza con: Tu Project ID
+   - Find: `prj-poc-001`
+   - Replace with: Your Project ID
 
 3. **kubernetes/app2.yaml**
-   - Busca: `prj-poc-001`
-   - Reemplaza con: Tu Project ID
+   - Find: `prj-poc-001`
+   - Replace with: Your Project ID
 
 4. **deploy/dev.yaml**
-   - Busca: `prj-poc-001`
-   - Reemplaza con: Tu Project ID
+   - Find: `prj-poc-001`
+   - Replace with: Your Project ID
 
 5. **deploy/prod.yaml**
-   - Busca: `prj-poc-001`
-   - Reemplaza con: Tu Project ID
+   - Find: `prj-poc-001`
+   - Replace with: Your Project ID
 
-## 🚀 Configuración de GitHub Actions
+## GitHub Actions Setup
 
-### Ya está listo! Solo necesitas:
+### Already configured! You just need to:
 
-1. **Subir el código a GitHub**:
+1. **Upload code to GitHub**:
 ```powershell
 git init
 git add .
 git commit -m "Add CI/CD pipeline"
 git branch -M main
-git remote add origin https://github.com/TU_USUARIO/gke-cicd.git
+git remote add origin https://github.com/YOUR_USER/gke-cicd.git
 git push -u origin main
 ```
 
-2. **Ver el pipeline ejecutándose**:
-   - Ve a tu repo en GitHub
-   - Click en "Actions"
-   - Mira el workflow en acción 🎉
+2. **View the pipeline running**:
+   - Go to your repo on GitHub
+   - Click on "Actions"
+   - Watch the workflow in action
 
-## 📋 Checklist de Configuración
+## Configuration Checklist
 
-- [ ] Ejecutar `configure.ps1` con tu Project ID (si usas GCP)
-- [ ] Verificar que los archivos se actualizaron
-- [ ] Crear repositorio en GitHub
-- [ ] Push del código
-- [ ] Verificar que GitHub Actions funciona
-- [ ] (Opcional) Crear clusters GKE
-- [ ] (Opcional) Crear Artifact Registry
-- [ ] (Opcional) Configurar Cloud Build Trigger
+- [ ] Run `configure.ps1` with your Project ID (if using GCP)
+- [ ] Verify files were updated
+- [ ] Create repository on GitHub
+- [ ] Push code
+- [ ] Verify GitHub Actions works
+- [ ] (Optional) Create GKE clusters
+- [ ] (Optional) Create Artifact Registry
+- [ ] (Optional) Configure Cloud Build Trigger
 
-## 🆓 Configuraciones Gratuitas
+## Free Configurations
 
-### GitHub Actions ✅ Ya configurado
-- Pipeline completo de CI/CD
-- Tests automatizados
+### GitHub Actions - Already configured
+- Complete CI/CD pipeline
+- Automated testing
 - Security scanning
-- 100% gratis para repos públicos
+- 100% free for public repos
 
-### Docker Compose ✅ Ya funcionando
+### Docker Compose - Already working
 ```powershell
-docker-compose up -d
+docker compose up -d
 ```
 
-### Minikube (Kubernetes local)
+### Minikube (Local Kubernetes)
 ```powershell
-# Instalar
+# Install
 choco install minikube
 
-# Usar
+# Use
 minikube start
 kubectl apply -f kubernetes/app1-local.yaml
 kubectl apply -f kubernetes/app2-local.yaml
 ```
 
-## 💰 Configuraciones de Pago (GCP)
+## Paid Configurations (GCP)
 
-Solo si quieres usar Google Cloud:
+Only if you want to use Google Cloud:
 
-1. **Crear proyecto en GCP**
-2. **Habilitar APIs**:
+1. **Create project in GCP**
+2. **Enable APIs**:
    - Kubernetes Engine API
    - Cloud Build API
    - Cloud Deploy API
    - Artifact Registry API
 
-3. **Crear recursos**:
+3. **Create resources**:
 ```bash
-# Clusters GKE
+# GKE Clusters
 gcloud container clusters create cluster-1 --zone=us-central1-c --num-nodes=3
 gcloud container clusters create cluster-2 --zone=us-central1-c --num-nodes=3
 
@@ -110,22 +110,22 @@ gcloud artifacts repositories create gke-repo \
   --location=us-central1
 ```
 
-4. **Conectar GitHub a Cloud Build**
+4. **Connect GitHub to Cloud Build**
    - Cloud Console → Cloud Build → Triggers
-   - Conectar repositorio
-   - Crear trigger en `cloudbuild.yaml`
+   - Connect repository
+   - Create trigger on `cloudbuild.yaml`
 
-## 🎓 Orden Recomendado de Pruebas
+## Recommended Testing Order
 
-1. ✅ **Local con Python** (ya probado)
-2. ✅ **Docker Compose** (ya funcionando)
-3. 🆕 **GitHub Actions** (push para activar)
-4. 🆕 **Minikube** (Kubernetes local gratis)
-5. 💰 **GKE** (Google Cloud - de pago)
+1. Local with Python (already tested)
+2. Docker Compose (already working)
+3. GitHub Actions (push to activate)
+4. Minikube (Free local Kubernetes)
+5. GKE (Google Cloud - paid)
 
-## 📞 ¿Necesitas ayuda?
+## Need Help?
 
-- GitHub Actions: Ver `.github/GITHUB_ACTIONS_GUIDE.md`
-- Testing: Ver `TESTING_GUIDE.md`
-- Deployment: Ver `LOCAL_DEPLOYMENT.md`
-- General: Ver `README.md`
+- GitHub Actions: See README.md
+- Testing: See documentation in the repository
+- Deployment: Follow the guides
+- General: Check README.md
